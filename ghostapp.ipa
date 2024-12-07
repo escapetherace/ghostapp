@@ -1,0 +1,96 @@
+//
+// GhostApp.swift
+//
+// A simple iOS app to display and randomize device information
+
+import SwiftUI
+import UIKit
+import Foundation
+
+struct ContentView: View {
+    @State private var deviceInfo: DeviceInfo = DeviceInfo.randomized()
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Ghost - Device Information")
+                .font(.largeTitle)
+                .padding()
+
+            VStack(alignment: .leading, spacing: 10) {
+                Text("UUID: \(deviceInfo.uuid)")
+                    .font(.body)
+                    .padding(.bottom, 5)
+
+                Text("HWID: \(deviceInfo.hwid)")
+                    .font(.body)
+                    .padding(.bottom, 5)
+
+                Text("Platform: \(deviceInfo.platform)")
+                    .font(.body)
+                    .padding(.bottom, 5)
+
+                Text("User Agent: \(deviceInfo.userAgent)")
+                    .font(.body)
+                    .padding(.bottom, 5)
+            }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(10)
+
+            Button(action: {
+                deviceInfo = DeviceInfo.randomized()
+            }) {
+                Text("Randomize Info")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(Color.blue)
+                    .cornerRadius(10)
+            }
+
+            Spacer()
+        }
+        .padding()
+        .background(Color(.systemBackground))
+    }
+}
+
+struct DeviceInfo {
+    let uuid: String
+    let hwid: String
+    let platform: String
+    let userAgent: String
+
+    static func randomized() -> DeviceInfo {
+        return DeviceInfo(
+            uuid: UUID().uuidString,
+            hwid: randomHWID(),
+            platform: UIDevice.current.systemName + " " + UIDevice.current.systemVersion,
+            userAgent: randomUserAgent()
+        )
+    }
+
+    private static func randomHWID() -> String {
+        return (1...16).map { _ in
+            String(format: "%02X", Int.random(in: 0...255))
+        }.joined(separator: ":")
+    }
+
+    private static func randomUserAgent() -> String {
+        let userAgentTemplates = [
+            "Mozilla/5.0 (iPhone; CPU iPhone OS \(\(version\)) like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.1 Mobile/15E148 Safari/604.1",
+            "Mozilla/5.0 (iPad; CPU OS \(\(version\)) like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148",
+        ]
+        let version = UIDevice.current.systemVersion
+        return userAgentTemplates.randomElement()?.replacingOccurrences(of: "\(\(version\))", with: version) ?? "Unknown"
+    }
+}
+
+@main
+struct DeviceInfoApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
